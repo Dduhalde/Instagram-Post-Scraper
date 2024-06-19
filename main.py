@@ -10,7 +10,8 @@ from dotenv import load_dotenv
 
 # Post class
 class Post:
-    def __init__(self, post_info, date, like):
+    def __init__(self, id, post_info, date, like):
+        self.id = id
         self.post_info = post_info
         self.date = date
         self.like = like
@@ -43,8 +44,6 @@ def instagramScrap(accountToScrap, driver, postAmountToScrap):
     posts = []
     # Loop to get the posts
     for _ in range(postAmountToScrap):
-        if _ % 10 == 0:
-            print(_)
         mySleep(1)
         html = driver.page_source
         soup = BeautifulSoup(html, 'html.parser')
@@ -67,7 +66,7 @@ def instagramScrap(accountToScrap, driver, postAmountToScrap):
         except:
             likes = 0
         # Create a post object
-        post = Post(postInfo, date, likes)
+        post = Post(_, postInfo, date, likes)
         # Append the post to the list
         posts.append(post)
         # Click the next button
@@ -91,9 +90,9 @@ def iniciar_sesion(driver, user, password):
 def listToCsv(list, filename):
     with open(filename, 'w', encoding='utf-8', newline='') as f:
         writer = csv.writer(f)
-        writer.writerow(['Post Info', 'Date', 'Likes'])
+        writer.writerow(['ID', 'Post Info', 'Date', 'Likes'])
         for item in list:
-            writer.writerow([item.post_info, item.date, item.like])
+            writer.writerow([item.id, item.post_info, item.date, item.like])
 
 if __name__ == '__main__':
     # Start the driver
@@ -108,9 +107,9 @@ if __name__ == '__main__':
     with open('accounts_to_scrap.txt', 'r') as file:
         accounts = file.read().splitlines()
     # Set the amount of posts to scrap
-    postAmountToScrap = 3000
+    postAmountToScrap = 10
     # Scrap the accounts
     for account in accounts:
         posts = instagramScrap(account, driver, postAmountToScrap)
-        listToCsv(posts, f'{account}.csv')
+        listToCsv(posts, f'csv/{account}.csv')
     driver.quit()
